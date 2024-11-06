@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shop Selection</title>
+    <style>
+        /* Basic reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Fullscreen form styling */
+        body, html {
+            height: 100%;
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+        }
+
+        /* Styling form to fill entire screen */
+        form {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 20px;
+            background: #ffffff;
+            width: 100%;
+        }
+
+        /* Label styling */
+        label {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        /* Select All button styling */
+        .select-all {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            color: #fff;
+            background-color: #ffc107;
+            border: none;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-align: center;
+        }
+
+        .select-all.selected {
+            background-color: #28a745; /* Green when selected */
+        }
+
+        .select-all:hover {
+            background-color: #e0a800;
+        }
+
+        /* Shop list styling */
+        .shop-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            overflow-y: auto;
+            max-height: 60%;
+            margin-bottom: 20px;
+        }
+
+        .shop-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .shop-name {
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        /* Individual select button styling */
+        button {
+            padding: 10px 15px;
+            font-size: 1em;
+            color: #fff;
+            background-color: #5b9bd5;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #3e8cb5;
+        }
+
+        /* Submit button styling */
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            color: #fff;
+            background-color: #5b9bd5;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-align: center;
+        }
+
+        .submit-btn:hover {
+            background-color: #3e8cb5;
+        }
+    </style>
+    <script>
+        const selectedShops = new Set();
+
+        function selectShop(shop, button) {
+            if (selectedShops.has(shop)) {
+                selectedShops.delete(shop);
+                button.textContent = "Select";
+            } else {
+                selectedShops.add(shop);
+                button.textContent = "Selected";
+            }
+            updateSelectedShopsInput();
+        }
+
+        function selectAllShops() {
+            const shopItems = document.querySelectorAll('.shop-item');
+            const selectAllButton = document.querySelector('.select-all');
+
+            if (selectedShops.size === shopItems.length) {
+                selectedShops.clear();
+                shopItems.forEach(item => {
+                    const button = item.querySelector('button');
+                    button.textContent = "Select";
+                });
+                selectAllButton.classList.remove('selected');
+            } else {
+                shopItems.forEach(item => {
+                    const shopName = item.querySelector('.shop-name').textContent;
+                    const button = item.querySelector('button');
+                    selectedShops.add(shopName);
+                    button.textContent = "Selected";
+                });
+                selectAllButton.classList.add('selected');
+            }
+            updateSelectedShopsInput();
+        }
+
+        function updateSelectedShopsInput() {
+            const selectedShopsInput = document.getElementById('selectedShops');
+            selectedShopsInput.value = Array.from(selectedShops).join(',');
+        }
+
+        function handleSubmit() {
+            const selectedShopsInput = document.getElementById('selectedShops');
+            selectedShopsInput.value = selectedShopsInput.value.replace(/,$/, '');
+        }
+    </script>
+</head>
+<body>
+    <form action="/select_shops" method="post" onsubmit="handleSubmit()">
+        <label>Select Shops:</label>
+        <button type="button" class="select-all" onclick="selectAllShops()">Select All</button>
+        <div class="shop-list">
+            {% for shop in shops %}
+                <div class="shop-item">
+                    <span class="shop-name">{{ shop }}</span>
+                    <button type="button" onclick="selectShop('{{ shop }}', this)">Select</button>
+                </div>
+            {% endfor %}
+        </div>
+        <input type="hidden" id="selectedShops" name="selectedShops">
+        <button type="submit" class="submit-btn">Submit</button>
+    </form>
+</body>
+</html>
